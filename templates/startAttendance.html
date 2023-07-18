@@ -1,0 +1,44 @@
+{% extends 'sideNav.html' %}
+{% block content %}
+<style>
+    .card {
+        background-color: rgb(248, 249, 250);
+        transition: background-color 0.6s, transform 0.6s ease;
+        border-radius: 5px;
+    }
+
+    .card:hover {
+        background-color: rgb(226, 232, 238);
+        transform: scale(1.05);
+        text-decoration: none;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+    a:hover {
+        text-decoration: none !important;
+    }
+    .card-body a:hover {
+        text-decoration: none;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        {% for field, class_names in fields.items() %}
+        {% if field == session['username'] %}
+        {% for class_name in class_names.split(',') %}
+        <div class="card col-md-4 mx-3 my-2">
+            <a class="card-body" href="/frontAttend/{{ class_name }}">
+                <h5 class="card-title">{{ field }}</h5>
+                <p class="card-text">{{ class_name }}</p>
+            </a>
+            <a href="/jjj/{{ class_name }}">Photo</a>
+            <!-- <a href="/frontAttend/{{ class_name }}">Front</a> -->
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

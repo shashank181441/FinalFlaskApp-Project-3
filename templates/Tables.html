@@ -1,0 +1,40 @@
+{% extends 'sideNav.html' %}
+{% block content %}
+<style>
+.card {
+    background-color: rgb(248, 249, 250);
+    transition: background-color 0.6s, transform 0.6s ease;
+    border-radius: 5px;
+}
+
+.card:hover {
+    background-color: rgb(226, 232, 238);
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none !important;
+}
+</style>
+<div class="container">
+    <div class="row">
+        {% for field, class_names in fields.items() %}
+        {%if field == session['username']%}
+        {% for class_name in class_names.split(',') %}
+        <a class="col-md-4" href="/page3/{{ class_name }}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ field }}</h5>
+                    <p class="card-text">{{ class_name }}</p>
+                </div>
+            </div>
+        </a>
+        
+        {% endfor %}
+        {%endif%}
+        {% endfor %}
+        
+    </div>
+</div>
+{% endblock %}

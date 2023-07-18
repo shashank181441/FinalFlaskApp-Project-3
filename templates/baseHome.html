@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page Navigation Example</title>
+    <style>
+        /* CSS for the page layout */
+        body {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            grid-gap: 20px;
+            padding: 20px;
+        }
+
+        /* CSS for the navigation section */
+        .navigation {
+            background-color: #333;
+            padding: 20px;
+            color: #fff;
+            font-family: Roboto, sans-serif;
+            
+        }
+
+        .navigation h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #fff;
+        }
+
+        .navigation ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .navigation li {
+            margin-bottom: 10px;
+        }
+
+        .navigation a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid #ccc;
+        }
+
+        .navigation a.current-page {
+            background-color: #555;
+        }
+
+        /* CSS for the content section */
+        .content {
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+
+        /* CSS for the full-page navigation section */
+        .full-nav {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 100vh;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .full-nav a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid #ccc;
+        }
+
+        .full-nav a:hover {
+            background-color: #555;
+        }
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles for the form */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Section -->
+    <div class="navigation">
+        <h2>Navigation</h2>
+        <ul>
+            <li><a href="page1">Attendance</a></li>
+            <li><a href="page2">Registration</a></li>
+            <li><a href="page3">Generate Report</a></li>
+        </ul>
+    </div>
+
+    <!-- Content Section -->
+    {% block content %}
+    {%endblock%}
+
+  
+
+    <script>
+        function shadeCurrentPage() {
+            var currentUrl = window.location.href;
+            var navigationLinks = document.querySelectorAll('.navigation a');
+            for (var i = 0; i < navigationLinks.length; i++) {
+                if (navigationLinks[i].href === currentUrl) {
+                    navigationLinks[i].classList.add('current-page');
+                }
+            }
+        }
+
+        shadeCurrentPage();
+    </script><script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

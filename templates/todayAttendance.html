@@ -1,0 +1,27 @@
+{% extends 'sideNav.html' %} 
+{% block content %}
+<div class="content">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Date</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in unique_values %}
+            <tr>
+                {% set parts = entry.split('@') %}
+                <td>{{ parts[0] }}</td>
+                <td>{{ parts[1] }}</td>
+                <td>{{ parts[2][:10] }}</td>
+                <td>{{ parts[2][11:] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

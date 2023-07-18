@@ -1,0 +1,20 @@
+{% extends 'sideNav.html' %}
+{% block content %}
+  <div class="container">
+    <div class="camera-container">
+      <h1 class="text-center mb-4">Camera Capture</h1>
+      <h3 class="text-center mb-4">{{ className }}</h3>
+      <div class="camera-frame">
+        <video id="video" autoplay></video>
+      </div>
+      <div class="text-center mt-4">
+        <form action="/submitFront" method="post">
+          <input type="hidden" name="className" value="{{ className }}">
+          <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

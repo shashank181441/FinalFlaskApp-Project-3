@@ -1,0 +1,19 @@
+{% extends 'sideNav.html' %}
+
+{% block content %}
+    <h1>Image Processing</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form action="/process" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" multiple required>
+        <input type="hidden" value="{{ className }}" name='className'>
+        <br><br>
+        <input type="submit" value="Process Images">
+    </form>
+    <div>
+        {% for image_url in processed_images %}
+            <img src="{{ image_url }}" alt="Processed Image">
+        {% endfor %}
+    </div>
+{% endblock %}

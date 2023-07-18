@@ -1,0 +1,30 @@
+{% extends 'sideNav.html' %}
+
+{% block content %}
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Teachers</th>
+                <th>Class Name</th>
+                <th> </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for field, class_names in fields.items() %}
+            <tr>
+                <td>{{ field }}</td>
+                <td>
+                {% for class_name in class_names.split(',') %}
+                        {{ class_name }} <br>
+                {% endfor %}</td>
+                <td>
+                <a href="deleteTeacher/{{field}}" class="btn btn-primary">Delete</a>
+            </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href='{{url_for("subjectEdit")}}' class="btn btn-primary">Edit</a>
+</div>
+{% endblock %}
