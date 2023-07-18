@@ -1,0 +1,31 @@
+{% extends 'sideNav.html' %}
+{% block content %}
+<div class="container">
+    <h2>Summary of Number of People per Role</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set roles_count = {} %}
+            {% for field in fields %}
+                {% set name, role = field.split('@') %}
+                {% if role not in roles_count.keys() %}
+                    {% set _ = roles_count.update({role: 1}) %}
+                {% else %}
+                    {% set _ = roles_count.update({role: roles_count[role] + 1}) %}
+                {% endif %}
+            {% endfor %}
+            {% for role, count in roles_count.items() %}
+                <tr>
+                    <td>{{ role }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'sideNav.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Admin Panel</h2>
+            <form method="POST" action="/subjectEdit">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Teacher</th>
+                            <th>Class</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field, class_name in fields.items() %}
+                        <tr>
+                            <td><input type="text" name="field" value="{{ field }}" style="width: 200px;"></td>
+                            <td><input type="text" name="class" value="{{ class_name }}" style="width: 400px;"></td>
+
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td><input type="text" name="field" style="width: 200px;"></td>
+                            <td><input type="text" name="class" style="width: 400px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

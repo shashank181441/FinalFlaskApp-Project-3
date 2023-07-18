@@ -1,0 +1,105 @@
+{% extends 'sideNav.html' %} 
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Field Names</h1>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <!-- <th>Edit</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for edit_field in fields %}
+                        <tr>
+                            <td>{{ edit_field }}</td>
+                            <td>
+                                <!-- <button type="button" class="btn btn-primary edit-btn" data-toggle="modal" data-target="#editModal{{ loop.index }}" data-field="{{ edit_field }}">Edit</button> -->
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary edit-btn" data-toggle="modal" data-target="#editModal" data-field="{{ edit_field }}">Edit</button>
+
+
+        {% for field in fields %}
+        <!-- Edit Modal for each field -->
+        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ loop.index }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel{{ loop.index }}">Edit Field Name</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="/changeFields">
+                            <div class="form-group">
+                                <label for="old_field">Select Field to Edit:</label>
+                                <select class="form-control" id="old_field" name="old_field">
+                                    {% for field in fields %}
+                                    <option value="{{ field }}">{{ field.split('@')[0] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="new_field">New Field Name:</label>
+                                <select class="form-control" id="new_field" name="new_field">
+                                    <option value="Student">Student</option>
+                                    <option value="Teacher">Teacher</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('summary') }}">Summary</a>
+        </li>
+
+    <script>
+        // Function to populate the form with student details when Edit button is clicked
+        function populateForm(field) {
+            var oldFieldSelect = document.getElementById('old_field');
+            var newFieldSelect = document.getElementById('new_field');
+
+            // Set the selected field in the form
+            for (var i = 0; i < oldFieldSelect.options.length; i++) {
+                if (oldFieldSelect.options[i].value === field) {
+                    oldFieldSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            // Extract the student name from the field value
+            var studentName = field.split('@')[0];
+
+            // Set the new field select option based on the student name
+            for (var j = 0; j < newFieldSelect.options.length; j++) {
+                if (newFieldSelect.options[j].value === studentName) {
+                    newFieldSelect.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+
+        // Attach click event listeners to the Edit buttons
+        var editButtons = document.getElementsByClassName('edit-btn');
+        for (var k = 0; k < editButtons.length; k++) {
+            editButtons[k].addEventListener('click', function() {
+                var field = this.getAttribute('data-field');
+                populateForm(field);
+            });
+        }
+    </script>
+{% endblock %}

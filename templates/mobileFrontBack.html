@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Access</title>
+  <style>
+    video {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Camera Access</h1>
+  <video id="camera-video" autoplay></video>
+  <button id="switch-camera-btn">Switch Camera</button>
+
+  <form action="/submitFront" method="post">
+    <input type="hidden" name="className" value="{{className}}">
+    <input type="submit" value="Submit" class="btn btn-primary">
+  </form>
+
+  <script>
+    var videoElement = document.getElementById('camera-video');
+    var switchCameraButton = document.getElementById('switch-camera-btn');
+    var currentCamera = 'user';
+
+    // Switch camera event listener
+    switchCameraButton.addEventListener('click', function() {
+      currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+      initializeCamera();
+    });
+
+    // Initialize camera
+    function initializeCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: currentCamera } })
+          .then(function(stream) {
+            videoElement.srcObject = stream;
+            let captureInterval;
+
+            // Function to capture and send frames
+            function captureAndSendFrame() {
+              // Create a canvas element to draw the video frame
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const context = canvas.getContext('2d');
+
+              // Draw the current video frame onto the canvas
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+              // Convert the canvas content to a Blob (image file)
+              canvas.toBlob(function(blob) {
+                // Create a FormData object to send the image file to the Flask server
+                const formData = new FormData();
+                formData.append('video_frame', blob);
+
+                // Send the image file to the Flask server only if the server is available
+                if (typeof navigator.onLine !== 'undefined' && navigator.onLine) {
+                  $.ajax({
+                    type: 'POST',
+                    url: '/process_js_frames',  // Update the URL to match the Flask route
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                      // Handle the server's response here
+                      console.log(response);
+                    },
+                    error: function(error) {
+                      console.error('Error sending video frame:', error);
+                    }
+                  });
+                }
+              }, 'image/jpeg');
+            }
+
+            // Start capturing and sending frames at a regular interval (e.g., every 100 milliseconds)
+            captureInterval = setInterval(captureAndSendFrame, 100);
+
+            // Stop capturing and sending frames when the window is closed or the page is unloaded
+            window.addEventListener('beforeunload', function() {
+              clearInterval(captureInterval);
+            });
+          
+          })
+          .catch(function(error) {
+            console.error('Error accessing camera:', error);
+          });
+      } else {
+        console.error('MediaDevices API not supported.');
+      }
+    }
+
+    // Initial camera initialization
+    initializeCamera();
+    captureInterval = setInterval(captureAndSendFrame, 100);
+
+    // Stop capturing and sending frames when the window is closed or the page is unloaded
+    window.addEventListener('beforeunload', function() {
+      clearInterval(captureInterval);
+    });
+  </script>
+</body>
+</html>

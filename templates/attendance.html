@@ -1,0 +1,41 @@
+{% extends 'sideNav.html' %}
+
+{% block content %}
+    <title>Attendance Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 0 auto;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+    <div class="content">
+    <h2 style="text-align: center">Attendance Table</h2>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Days Present</th>
+        </tr>
+        {% for name, count in names.items() %}
+        <tr>
+            <td>{{ name }}</td>
+            <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <!-- <form action="/page3/<className>" method="post">
+        <button type="submit" class="btn btn-primary">Download CSV</button>
+    </form> -->
+    </div>  
+{%endblock%}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Upload</title>
+</head>
+<body>
+    <h1>Image Upload</h1>
+    
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <br><br>
+        <input type="submit" value="Upload Image">
+    </form>
+    /Users/shashankpandey/Desktop/project_tryouts/completeFlaskApp/{{ image_path }}
+    {% if image_path %}
+        <h2>Uploaded Image:</h2>
+        <img src="{{image_path}}" alt="My Image">
+        <img src="static/rajan_original_Screenshot 2023-06-06 at 8.33.19 PM.png_3a7f1889-df51-41a3-b6bf-73d3b693d4e7.png" alt="ssr">
+
+    {% endif %}
+</body>
+</html>

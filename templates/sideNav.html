@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sidebar Example</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 240px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            transition: background-color 1s, transform 1s ease;
+        }
+    
+        .sidebar .nav-link:hover {
+            background-color: rgb(226, 232, 238);
+            transform: scale(1.05);
+            transition: background-color 0.6s, transform 0.6s ease;
+        }
+    
+        .sidebar .nav-link {
+            color: #333;
+        }
+    
+        .sidebar .nav-link.active {
+            font-weight: bold;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-3">
+                <div class="sidebar">
+                    <ul class="nav flex-column">
+                        {% if 'username' in session and session['username'] == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('changeField') }}">Role</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('subjects') }}">Teacher Profile</a>
+                        </li>
+                        {% elif 'username' in session and session['username'] != '' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('startClass') }}">Attendance</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('page2') }}">Registration</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('table') }}">Reports</a>
+                        </li>
+                        
+                        {% if "username" in session %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Logout</a>
+                        </li>{% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <div class="col-9 mt-3">
+                {% block content %}{%endblock%}
+                <!-- Your main content goes here -->
+            </div>
+        </div>
+    </div>
+    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Add 'active' class to the current link in the sidebar
+        var currentLocation = window.location.href;
+        var navLinks = document.querySelectorAll('.sidebar .nav-link');
+
+        navLinks.forEach(function (link) {
+            if (link.href === currentLocation) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
