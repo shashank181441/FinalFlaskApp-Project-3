@@ -5,6 +5,7 @@
         background-color: rgb(248, 249, 250);
         transition: background-color 0.6s, transform 0.6s ease;
         border-radius: 5px;
+        width: 300px; /* Set the width of the card */
     }
 
     .card:hover {
@@ -28,13 +29,12 @@
         {% for field, class_names in fields.items() %}
         {% if field == session['username'] %}
         {% for class_name in class_names.split(',') %}
-        <div class="card col-md-4 mx-3 my-2">
+        <div class="card mr-3 mb-2"> <!-- Removed col-md-4, mx-3, my-2 classes -->
             <a class="card-body" href="/frontAttend/{{ class_name }}">
                 <h5 class="card-title">{{ field }}</h5>
                 <p class="card-text">{{ class_name }}</p>
             </a>
             <a href="/jjj/{{ class_name }}">Photo</a>
-            <!-- <a href="/frontAttend/{{ class_name }}">Front</a> -->
         </div>
         {% endfor %}
         {% endif %}

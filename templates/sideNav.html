@@ -28,13 +28,35 @@
         .sidebar .nav-link.active {
             font-weight: bold;
         }
+
+        /* Add CSS for responsive layout */
+        @media (max-width: 767.98px) {
+            .container-fluid {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 20px 0;
+                position: relative;
+                transform: none;
+            }
+            .sidebar .nav-link {
+                text-align: center;
+                display: block;
+            }
+            .main-content {
+                margin-top: 20px;
+            }
+        }
     </style>
-    
+
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-3">
+            <div class="col-6 col-md-3">
                 <div class="sidebar">
                     <ul class="nav flex-column">
                         {% if 'username' in session and session['username'] == 'admin' %}
@@ -49,13 +71,13 @@
                                 <a class="nav-link" href="{{ url_for('startClass') }}">Attendance</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('page2') }}">Registration</a>
+                                <a class="nav-link" href="{{ url_for('frontRegister') }}">Registration</a>
                             </li>
                         {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('table') }}">Reports</a>
                         </li>
-                        
+
                         {% if "username" in session %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('login') }}">Logout</a>
@@ -64,14 +86,13 @@
                 </div>
             </div>
 
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <div class="col-9 mt-3">
-                {% block content %}{%endblock%}
+            <div class="col-12 col-md-9 main-content my-3">
+                {% block content %}{% endblock %}
                 <!-- Your main content goes here -->
             </div>
         </div>
     </div>
-    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>

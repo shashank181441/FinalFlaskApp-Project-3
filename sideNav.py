@@ -13,6 +13,8 @@ import face_recognition
 import faceRegistration as fr
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'
+
 
 r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
 app.secret_key = 'secret_key'
@@ -22,19 +24,23 @@ def index():
     if 'username' in session:
         if session['username'] == 'admin':
             return redirect('/changeFields')
-        elif session['username'] != '':
+        elif session['username'] != '' and session['password'] == 'teacher':
+            print(session['username'])
             return redirect(url_for("startClass"))
     return redirect(url_for('login'))
 
 @app.route('/startClass')
 def startClass():
-    r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
-    face_rec.extract_data()
-    fr.unique_values=[]
-    # Retrieve field names and classes from the Redis database
-    fields = r.hgetall('Teacher')
-    fields = {key.decode(): value.decode() for key, value in fields.items()}
-    return render_template('startAttendance.html', fields=fields)
+    if "username" in session and session['password']=='teacher' and session['username']!='':
+        r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
+        face_rec.extract_data()
+        fr.unique_values=[]
+        # Retrieve field names and classes from the Redis database
+        fields = r.hgetall('Teacher')
+        fields = {key.decode(): value.decode() for key, value in fields.items()}
+        return render_template('startAttendance.html', fields=fields)
+    else:
+        return redirect('url_for(login)')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -156,6 +162,8 @@ def download_csv():
 def logout():
     # Clear the 'username' session variable
     session.pop('username', None)
+    session['username'] = ''
+    session['password'] = ''
     # Redirect the user to the login page
     return redirect(url_for('login'))
 
@@ -316,17 +324,20 @@ def deleteTeacher(name):
 def frontAttend(className):
     print("classname=%s"%className)
     fr.unique_values = []
-    return render_template('takeAttendance.html', className=className)
+    return render_template('index69.html', className=className)
 
 # Route to receive video frames
 # unique_values=[]
 @app.route('/process_js_frames', methods=['POST','GET'])
 def process_js_frames():
-    
+
     # Get the video frame from the request
     frames = request.files['video_frame']
-    # Convert the video frame to a format suitable for face_recognition
-    frame = face_recognition.load_image_file(frames)
+
+    image = Image.open(io.BytesIO(frames.read()))
+
+    # Convert the Image object to a numpy array suitable for face recognition
+    frame = np.array(image)
 
     pred_frame, names= face_rec.face_prediction(frame, face_rec.retrive_df, 'facial_features', ['Name', 'Role'], thresh=0.5)
     print(names)
@@ -382,6 +393,60 @@ def submitFront():
 @app.route('/rough')
 def rough():
     return render_template('rough.html')
+
+@app.route('/frontRegister')
+def frontRegister():
+    file_names = os.listdir("static")
+    for file_name in file_names:
+            file_path = os.path.join('static', file_name)
+            if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+    return render_template('register.html')
+
+count = 0  # Initialize the count variable
+
+@app.route('/registerPeople', methods=['POST'])
+def register_people():
+    # Access the global count variable
+    global count
+
+    frames = request.files.getlist('video_frame')
+    save_directory = f'static'
+
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
+    print(count)
+
+    for frame in frames:
+        # if count >= 100:
+        #     return redirect(url_for('frontAttend'))  # Redirect to "frontAttend" when 100 frames are saved
+
+        # Generate a unique file name using timestamp and count
+        # timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = datetime.datetime.now()
+        save_path = os.path.join(save_directory, f'frame_{timestamp}_{count}.jpg')
+        count+=1
+
+        # Save the frame to the static folder
+        frame.save(save_path)
+    return "pic capturing"
+
+capture_count=0
+face_embeddings=[]
+@app.route('/submitRegister', methods=['POST', 'GET'])
+def submitRegister():
+    global capture_count, face_embeddings
+    print("hello world")
+    if request.method == 'POST':
+        # Process login form data here
+        name = request.form['name']
+        print(name)
+    fr.registerPerson(name)
+    key = name + '@' + "student"
+
+
+    return 'registered'
 
 if __name__ == "__main__":
     # Generate self-signed SSL certificate

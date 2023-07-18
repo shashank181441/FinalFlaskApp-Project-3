@@ -2,6 +2,7 @@ from collections import Counter
 import csv
 import datetime
 import io
+from PIL import Image
 import face_recognition
 from flask import Flask, render_template, request, redirect, url_for, Response, session
 import cv2
@@ -289,3 +290,52 @@ def generate_frames_for_register():
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     cap.release()
+
+capture_count=0
+face_embeddings=[]
+
+def registerPerson(name):
+    global capture_count, face_embeddings
+    key = name + '@' + "student"
+    folder_path = "static"
+
+# Get the list of file names in the folder
+    file_names = os.listdir(folder_path)
+
+    # Iterate over each file in the folder
+    for file_name in file_names:
+        # Construct the full file path
+        file_path = os.path.join(folder_path, file_name)
+
+    # Check if the file is an image (optional)
+        if file_path.endswith((".jpg", ".jpeg", ".png")):
+            image_file = Image.open(file_path)
+            # Convert the PIL image to a NumPy array
+            image = np.array(image_file)
+            # Print the shape of the array
+            try:
+                results = faceapp.get(image, max_num=1)
+                for res in results:
+                    capture_count += 1
+                    x1, y1, x2, y2 = res['bbox'].astype(int)
+                    cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 1)
+
+                    # Facial features
+                    embeddings = res['embedding']
+                    face_embeddings.append(embeddings)
+            except Exception:
+                continue
+    if len(face_embeddings) > 0:
+        x_mean = np.mean(face_embeddings, axis=0)
+        x_mean_bytes = x_mean.tobytes()
+
+        # Save data into Redis
+        r.hset(name='academy:register', key=key, value=x_mean_bytes)
+
+        # Delete captured images
+        for file_name in file_names:
+            file_path = os.path.join(folder_path, file_name)
+            if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+        return key
