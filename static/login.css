@@ -1,0 +1,20 @@
+.form-container11 {
+    border: 3px solid #74dd9b !important;
+    border-radius: 10px !important;
+
+    padding: 20px !important;
+    width: 300px !important; /* Adjust this value based on your needs /
+    margin:auto; / Center the container horizontally */
+    margin-top: 50px !important;
+  }
+
+
+
+  .but-on{
+    display: flex;
+  justify-content: center;
+  }
+
+  /* .splash-content{
+
+  } */

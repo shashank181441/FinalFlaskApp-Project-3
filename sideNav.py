@@ -6,6 +6,7 @@ import os
 import numpy as np
 from PIL import Image
 
+import csv
 import face_rec
 import redis
 from insightface.app import FaceAnalysis
@@ -13,29 +14,38 @@ import face_recognition
 import faceRegistration as fr
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'
+
 
 r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
 app.secret_key = 'secret_key'
 
+# Main crash page
 @app.route('/')
 def index():
     if 'username' in session:
         if session['username'] == 'admin':
             return redirect('/changeFields')
-        elif session['username'] != '':
+        elif session['username'] != '' and session['password'] == 'teacher':
+            print(session['username'])
             return redirect(url_for("startClass"))
     return redirect(url_for('login'))
 
+# List of all subjects taught by teacher
 @app.route('/startClass')
 def startClass():
-    r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
-    face_rec.extract_data()
-    fr.unique_values=[]
-    # Retrieve field names and classes from the Redis database
-    fields = r.hgetall('Teacher')
-    fields = {key.decode(): value.decode() for key, value in fields.items()}
-    return render_template('startAttendance.html', fields=fields)
+    if "username" in session and session['password']=='teacher' and session['username']!='':
+        r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
+        face_rec.extract_data()
+        fr.unique_values=[]
+        # Retrieve field names and classes from the Redis database
+        fields = r.hgetall('Teacher')
+        fields = {key.decode(): value.decode() for key, value in fields.items()}
+        return render_template('startAttendance.html', fields=fields)
+    else:
+        return redirect('url_for(login)')
 
+# Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -64,10 +74,6 @@ def login():
             flash('Invalid username or password', 'error')
     return render_template('login.html')
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(fr.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 @app.route('/video_feed_for_register')
 def video_feed_for_register():
@@ -91,6 +97,7 @@ def success(key):
     img_files = [f'{key}_{i}.jpg' for i in range(1, 51)]
     return render_template('success.html', key=key, img_files=img_files)
 
+# Backend attendance camera (move to last)
 @app.route('/page1/<className>')
 def page1(className):
     fr.unique_values=[]
@@ -115,12 +122,25 @@ def handle_attend_form():
     fr.unique_values = []
     return render_template('todayAttendance.html', unique_values=updated_values)
 
+#backend register camera and form(move to last)
 @app.route('/page2')
 def page2():
     return render_template('faceregflask.html')
 
 from faceRegistration import get_attendance_data, generate_csv, process_image
 
+# Retrieve subject names and students present in each class
+@app.route('/table')
+def table():
+    r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
+
+    fields = r.hgetall('Teacher')
+    fields = {key.decode(): value.decode() for key, value in fields.items()}
+    for field, class_names in fields.items():
+        print(field)
+    return render_template('Tables.html', fields=fields)
+
+# show table of present students
 @app.route('/page3/<className>', methods=['GET', 'POST'])
 def page3(className):
     result_dict = get_attendance_data(className)
@@ -134,32 +154,17 @@ def page3(className):
         return response
     return render_template('attendance.html', names=result_dict, className=className)
 
-import csv
-
-@app.route('/download_csv')
-def download_csv():
-    # Create a CSV file with the data
-    csv_data = [['Name', 'Days Present']]
-    for name, count in names.items():
-        csv_data.append([name, count])
-
-    # Generate the CSV file and send it as a response
-    response = Response(content_type='text/csv')
-    response.headers.set('Content-Disposition', 'attachment', filename='attendance.csv')
-
-    writer = csv.writer(response)
-    writer.writerows(csv_data)
-
-    return response
-
+#log out form
 @app.route('/logout')
 def logout():
     # Clear the 'username' session variable
     session.pop('username', None)
+    session['username'] = ''
+    session['password'] = ''
     # Redirect the user to the login page
     return redirect(url_for('login'))
 
-
+# admin panel - displays names of faces registered
 @app.route('/changeFields', methods=['POST', 'GET'])
 def changeField():
     # Connect to the Redis database
@@ -185,15 +190,8 @@ def changeField():
     print(teachers, fields)
     return render_template('changeFields.html', fields=fields)
 
-@app.route('/table')
-def table():
-    r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
 
-    fields = r.hgetall('Teacher')
-    fields = {key.decode(): value.decode() for key, value in fields.items()}
-    for field, class_names in fields.items():
-        print(field)
-    return render_template('Tables.html', fields=fields)
+
 
 @app.route('/summary', methods=['POST', 'GET'])
 def summary():
@@ -316,17 +314,20 @@ def deleteTeacher(name):
 def frontAttend(className):
     print("classname=%s"%className)
     fr.unique_values = []
-    return render_template('takeAttendance.html', className=className)
+    fr.names=[]
+    return render_template('index69.html', className=className)
 
 # Route to receive video frames
 # unique_values=[]
 @app.route('/process_js_frames', methods=['POST','GET'])
 def process_js_frames():
-    
     # Get the video frame from the request
     frames = request.files['video_frame']
-    # Convert the video frame to a format suitable for face_recognition
-    frame = face_recognition.load_image_file(frames)
+
+    image = Image.open(io.BytesIO(frames.read()))
+
+    # Convert the Image object to a numpy array suitable for face recognition
+    frame = np.array(image)
 
     pred_frame, names= face_rec.face_prediction(frame, face_rec.retrive_df, 'facial_features', ['Name', 'Role'], thresh=0.5)
     print(names)
@@ -347,9 +348,11 @@ def process_js_frames():
             # Check if the extracted value is already present in the list
             if extracted_value not in [val.split("@")[0] for val in fr.unique_values]:
                 fr.unique_values.append(unique_value)
+                fr.names.append(extracted_value)
     # Prepare the response
     response = {
         'report': fr.unique_values,
+        'names': fr.names
         # Add any other relevant data or results here
     }
     print(response)
@@ -382,6 +385,131 @@ def submitFront():
 @app.route('/rough')
 def rough():
     return render_template('rough.html')
+
+@app.route('/frontRegister')
+def frontRegister():
+    file_names = os.listdir("static")
+    for file_name in file_names:
+            file_path = os.path.join('static', file_name)
+            if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+    return render_template('register.html')
+
+count = 0  # Initialize the count variable
+
+@app.route('/registerPeople', methods=['POST'])
+def register_people():
+    # Access the global count variable
+    global count
+
+    frames = request.files.getlist('video_frame')
+    save_directory = f'static'
+
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
+    print(count)
+
+    for frame in frames:
+        # if count >= 100:
+        #     return redirect(url_for('frontAttend'))  # Redirect to "frontAttend" when 100 frames are saved
+        
+        # Generate a unique file name using timestamp and count
+        # timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = datetime.datetime.now()
+        save_path = os.path.join(save_directory, f'frame_{timestamp}_{count}.jpg')
+        count+=1
+
+        # Save the frame to the static folder
+        frame.save(save_path)
+    return "pic capturing"
+
+capture_count=0
+face_embeddings=[]
+@app.route('/submitRegister', methods=['POST', 'GET'])
+def submitRegister():
+    global capture_count, face_embeddings
+    # print("hello world")
+    if request.method == 'POST':
+        # Process login form data here
+        name = request.form['name']
+        print(name)
+    fr.registerPerson(name)
+    key = name + '@' + "student"
+
+
+
+    return render_template("registerSuccessful.html")
+
+
+
+#Backend Video feed 
+@app.route('/video_feed')
+def video_feed():
+    return Response(fr.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+#Download CSV file
+@app.route('/download_csv')
+def download_csv():
+    # Create a CSV file with the data
+    csv_data = [['Name', 'Days Present']]
+    for name, count in names.items():
+        csv_data.append([name, count])
+
+    # Generate the CSV file and send it as a response
+    response = Response(content_type='text/csv')
+    response.headers.set('Content-Disposition', 'attachment', filename='attendance.csv')
+
+    writer = csv.writer(response)
+    writer.writerows(csv_data)
+
+    return response
+
+@app.route('/spoofFrontAttend/<className>')
+def spoofFrontAttend(className):
+    print("classname=%s"%className)
+    fr.unique_values = []
+    fr.names=[]
+    return render_template('spoofAttend.html', className=className)
+
+@app.route('/process_js_frames_spoof', methods=['POST','GET'])
+def process_js_frames_spoof():
+    # Get the video frame from the request
+    frames = request.files['video_frame']
+    
+    image = Image.open(io.BytesIO(frames.read()))
+
+    # Convert the Image object to a numpy array suitable for face recognition
+    frame = np.array(image)
+
+    pred_frame, names, tcount= face_rec.face_predictionss(frame, face_rec.retrive_df, 'facial_features', ['Name', 'Role'], thresh=0.5)
+
+    for name, role in names:
+        if name and name !='Unknown':
+        #     if total_counts[name]["Real"]+total_counts[name]["Fake"]>=10:
+        #         if total_counts[name]["Real"]>total_counts[name]["Fake"]:
+
+                    value = name
+                    if not value:
+                        break
+
+                    # Generate the unique value with datetime
+                    unique_value = f"{value}@{role}@{datetime.datetime.now()}"
+                    # Extract the value without datetime for comparison
+                    extracted_value = value.split("@")[0]
+                    # Check if the extracted value is already present in the list
+                    if extracted_value not in [val.split("@")[0] for val in fr.unique_values]:
+                        fr.unique_values.append(unique_value)
+                        fr.names.append(extracted_value)
+    # Prepare the response
+    response = {
+        'report': fr.unique_values,
+        'names': fr.names,
+        't_count': tcount
+        # Add any other relevant data or results here
+    }
+
+    return jsonify(response)
 
 if __name__ == "__main__":
     # Generate self-signed SSL certificate

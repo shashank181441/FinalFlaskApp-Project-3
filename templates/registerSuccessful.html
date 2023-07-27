@@ -1,0 +1,12 @@
+{% extends 'sideNav.html' %}
+
+{% block content %}
+<h1 class="text-center">Registration Suucessful</h1>
+
+<script>
+    // Automatically redirect to the home page after 2 seconds (2000 milliseconds)
+    setTimeout(function () {
+        window.location.href = '/frontRegister';
+    }, 2000);
+</script>
+{%endblock%}

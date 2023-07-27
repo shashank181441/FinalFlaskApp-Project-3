@@ -60,7 +60,6 @@ def face_prediction(test_image, dataframe,feature_column,
     names=roles=[]
     # step-1: take the test image and apply to insight face
     results = faceapp.get(test_image)
-    print(results)
     test_copy = test_image.copy()
     # step-2: use for loop and extract each embedding and pass to ml_search_algorithm
 
@@ -207,16 +206,16 @@ def face_predictions(test_image, dataframe, feature_column, name_role=['Name', '
 
     return test_copy, names
 
-names = []
+# names = []
 total_counts = {}
-t_counts={}
+# t_counts={}
 def face_predictionss(test_image, dataframe, feature_column, name_role=['Name', 'Role'], thresh=0.5):
     # names = []
     # total_counts = {}
-    global names, total_counts, t_counts
+    global total_counts
+    names = [] # Make sure total_counts is a dictionary, not a list
     # step-1: take the test image and apply to insight face
     results = faceapp.get(test_image)
-    print(results)
     test_copy = test_image.copy()
     
     # step-2: use for loop and extract each embedding and pass to ml_search_algorithm
@@ -273,11 +272,12 @@ def face_predictionss(test_image, dataframe, feature_column, name_role=['Name', 
             total_counts[pname] = {'Real': 0, 'Fake': 0}
 
         total_counts[pname][text_gen] += 1
-        if total_counts[pname]['Real']+ total_counts[pname]['Fake']>=10:
-            t_counts=total_counts
+        # if total_counts[pname]['Real']+ total_counts[pname]['Fake']>=10:
+        #     t_counts=total_counts
 
-    for name, counts in t_counts.items():
+    for name, counts in total_counts.items():
         print(f"{name}: {counts}")
         print(total_counts)
+    print(total_counts)
 
-    return test_copy, names, t_counts
+    return test_copy, names, total_counts
