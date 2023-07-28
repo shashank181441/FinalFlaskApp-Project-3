@@ -48,6 +48,7 @@ def startClass():
 # Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     if request.method == 'POST':
         # Process login form data here
         username = request.form['username']
@@ -133,18 +134,26 @@ from faceRegistration import get_attendance_data, generate_csv, process_image
 @app.route('/table')
 def table():
     r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
-
     fields = r.hgetall('Teacher')
     fields = {key.decode(): value.decode() for key, value in fields.items()}
     for field, class_names in fields.items():
         print(field)
-    return render_template('Tables.html', fields=fields)
+    if session['username']=='admin':
+        list_data = r.lrange('tryAttendwithSub', 0, -1)
+        fields = fr.calculate_attendance(list_data)
+        return render_template('adminTable.html', fields=fields)
+    elif session['username']!='':
+        return render_template('Tables.html', fields=fields)
+    else:
+        return redirect(url_for('login'))
 
 # show table of present students
 @app.route('/page3/<className>', methods=['GET', 'POST'])
 def page3(className):
     result_dict = get_attendance_data(className)
-    
+    r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
+    list_data = r.lrange('tryAttendwithSub', 0, -1)
+    print(f"result_dict={result_dict}")
     if request.method == 'POST':
         # Generate the CSV file
         csv_data = generate_csv(result_dict)
@@ -169,7 +178,8 @@ def logout():
 def changeField():
     # Connect to the Redis database
     r = redis.Redis(host='redis-12084.c301.ap-south-1-1.ec2.cloud.redislabs.com', port=12084, password='HnYyQx7B7hqPWS0OvE45nVAMm48xzkRd', db=0)
-
+    if session['username'] != 'admin':
+        return redirect(url_for('login'))
     # Handle form submission
     if request.method == 'POST':
         # Get the form data
@@ -510,6 +520,10 @@ def process_js_frames_spoof():
     }
 
     return jsonify(response)
+
+@app.route('/inn')
+def insect():
+	return render_template('sideNavNew.html')
 
 if __name__ == "__main__":
     # Generate self-signed SSL certificate

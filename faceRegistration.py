@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict
 import csv
 import datetime
 import io
@@ -11,6 +11,8 @@ import numpy as np
 import redis
 from insightface.app import FaceAnalysis
 import face_rec
+
+from datetime import datetime, timedelta
 # app = Flask(__name__)
 
 # Configure Redis connection
@@ -48,7 +50,7 @@ def generate_frames():
                                 break
 
                             # Generate the unique value with datetime
-                            unique_value = f"{value}@{role}@{datetime.datetime.now()}"
+                            unique_value = f"{value}@{role}@{datetime.now()}"
                             # Extract the value without datetime for comparison
                             extracted_value = value.split("@")[0]
                             # Check if the extracted value is already present in the list
@@ -132,11 +134,11 @@ def get_attendance_data(className):
     list_data = [item.decode('utf-8') for item in list_data]
 
     # Filter data for the latest seven days
-    today = datetime.datetime.now().date()
-    latest_seven_days = [today - datetime.timedelta(days=i) for i in range(7)]
+    today = datetime.now().date()
+    latest_seven_days = [today - timedelta(days=i) for i in range(30)]
     print(latest_seven_days)
     latest_seven_days_data = [
-    item for item in list_data if len(item.split('@')) >= 4 and datetime.datetime.strptime(item.split('@')[-2], "%Y-%m-%d %H:%M:%S.%f").date() in latest_seven_days
+    item for item in list_data if len(item.split('@')) >= 4 and datetime.strptime(item.split('@')[-2], "%Y-%m-%d %H:%M:%S.%f").date() in latest_seven_days
     ]
 
     # Extract names from the filtered data and count their occurrences
@@ -207,7 +209,7 @@ def process_image(image_path):
                 return
 
             # Generate the unique value with datetime
-            unique_value = f"{value}@{role}@{datetime.datetime.now()}"
+            unique_value = f"{value}@{role}@{datetime.now()}"
             # Extract the value without datetime for comparison
             extracted_value = value.split("@")[0]
             # Check if the extracted value is already present in the list
@@ -241,7 +243,7 @@ def process_frames(frame, retrive_df, className):
             break
 
         # Generate the unique value with datetime and class name
-        unique_value = f"{value}@{role}@{datetime.datetime.now()}"
+        unique_value = f"{value}@{role}@{datetime.now()}"
         # Extract the value without datetime for comparison
         extracted_value = value.split("@")[0]
         
@@ -273,7 +275,7 @@ def generate_frames_for_register():
                         break
 
                     # Generate the unique value with datetime
-                    unique_value = f"{value}@{role}@{datetime.datetime.now()}"
+                    unique_value = f"{value}@{role}@{datetime.now()}"
                     # Extract the value without datetime for comparison
                     extracted_value = value.split("@")[0]
                     # Check if the extracted value is already present in the list
@@ -341,3 +343,24 @@ def registerPerson(name):
         # return key
     
 names=[]
+
+def calculate_attendance(fields):
+    subject_attendance = defaultdict(int)
+    subject_first_appearance = {}
+
+    for field in fields:
+        # Decode the bytes data into a string
+        field_str = field.decode('utf-8')
+        name, role, date, className = field_str.split('@')
+        subject_attendance[className] += 1
+
+        if className not in subject_first_appearance:
+            subject_first_appearance[className] = datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f")
+
+    attendance_data = []
+
+    for className, attendance in subject_attendance.items():
+        first_appearance = subject_first_appearance[className].strftime("%Y-%m-%d %H:%M:%S")
+        attendance_data.append((className, attendance, first_appearance))
+
+    return attendance_data

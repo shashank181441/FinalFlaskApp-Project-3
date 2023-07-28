@@ -87,8 +87,7 @@ def face_prediction(test_image, dataframe,feature_column,
 
         cv2.putText(test_copy,text_gen,(x1,y1),cv2.FONT_HERSHEY_DUPLEX,0.7,color,2)
         cv2.putText(test_copy,date,(x2,y2),cv2.FONT_HERSHEY_DUPLEX,0.7,color,2)
-        # print(date)
-        # print(person_name)
+        
 
 
     return test_copy, names
@@ -139,7 +138,6 @@ def extract_data():
     retrive_df[['Name','Role']] = retrive_df['name_role'].apply(lambda x: x.split('@')).apply(pd.Series)
     retrive_df
 extract_data()
-print(retrive_df)
 
 
 def face_predictions(test_image, dataframe, feature_column, name_role=['Name', 'Role'], thresh=0.5):

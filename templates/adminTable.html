@@ -1,3 +1,4 @@
+
 {% extends 'sideNavNew.html' %}
 
 {% block content %}
@@ -20,18 +21,20 @@
         }
     </style>
     <div class="content">
-    <h2 style="text-align: center">Attendance Table</h2>
+    <h2 style="text-align: center">All Subjects</h2>
     <table>
         <tr>
-            <th>Name</th>
-            <th>Days Present</th>
+            <th>Subject</th>
+            <th>Total Attendance</th>
+            <th>First Appearance</th>
         </tr>
-        {% for name, count in names.items() %}
-        <tr>
-            <td>{{ name }}</td>
-            <td>{{ count }}</td>
-        </tr>
-        {% endfor %}
+        {% for subject, attendance, first_appearance in fields %}
+            <tr>
+                <td>{{ subject }}</td>
+                <td>{{ attendance }}</td>
+                <td>{{ first_appearance }}</td>
+            </tr>
+            {% endfor %}
     </table>
     
     <!-- <form action="/page3/<className>" method="post">
@@ -39,3 +42,4 @@
     </form> -->
     </div>  
 {%endblock%}
+
